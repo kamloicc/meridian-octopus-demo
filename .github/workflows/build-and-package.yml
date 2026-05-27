@@ -142,6 +142,7 @@ jobs:
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
         packages: "LegacyLoanProcessor.${{ env.VERSION }}.zip"
+        overwrite_mode: OverwriteExisting
     
     - name: Push Helm chart to Octopus
       uses: OctopusDeploy/push-package-action@v3
@@ -150,6 +151,7 @@ jobs:
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
         packages: "customer-api-chart-${{ env.VERSION }}.tgz"
+        overwrite_mode: OverwriteExisting
 
   create-octopus-releases:
     name: Create and Deploy Octopus Releases
