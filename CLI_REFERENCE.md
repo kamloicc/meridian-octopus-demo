@@ -15,6 +15,17 @@ The workflow uses the official Octopus CLI GitHub Action:
 octopus version
 ```
 
+## Authentication
+
+Octopus CLI v2 expects authentication via environment variables:
+
+```bash
+export OCTOPUS_URL="https://kamloicem.octopus.app/"
+export OCTOPUS_API_KEY="your-api-key"
+```
+
+Once set, all commands automatically use these credentials.
+
 ## Command Reference
 
 ### 1. Upload Package
@@ -24,21 +35,25 @@ octopus version
 octo push --package <file> --server <url> --apiKey <key>
 ```
 
-**New syntax (octopus):**
+**New syntax (octopus v2 - with environment variables):**
 ```bash
+# Set authentication once
+export OCTOPUS_URL="https://kamloicem.octopus.app/"
+export OCTOPUS_API_KEY="your-api-key"
+
+# Then use commands without auth flags
 octopus package upload \
   --file <file> \
-  --server <url> \
-  --apiKey <key> \
   --space <space>
 ```
 
 **Example:**
 ```bash
+export OCTOPUS_URL="https://kamloicem.octopus.app/"
+export OCTOPUS_API_KEY=$OCTOPUS_API_KEY
+
 octopus package upload \
   --file LegacyLoanProcessor.42.zip \
-  --server https://kamloicem.octopus.app/ \
-  --apiKey $OCTOPUS_API_KEY \
   --space "Default"
 ```
 
@@ -49,23 +64,27 @@ octopus package upload \
 octo create-release --project <name> --version <ver> --server <url>
 ```
 
-**New syntax (octopus):**
+**New syntax (octopus v2 - with environment variables):**
 ```bash
+# Set authentication once
+export OCTOPUS_URL="https://kamloicem.octopus.app/"
+export OCTOPUS_API_KEY="your-api-key"
+
+# Then use commands without auth flags
 octopus release create \
   --project <name> \
   --version <ver> \
-  --server <url> \
-  --apiKey <key> \
   --space <space>
 ```
 
 **Example:**
 ```bash
+export OCTOPUS_URL="https://kamloicem.octopus.app/"
+export OCTOPUS_API_KEY=$OCTOPUS_API_KEY
+
 octopus release create \
   --project "meridian - legacy" \
   --version 42 \
-  --server https://kamloicem.octopus.app/ \
-  --apiKey $OCTOPUS_API_KEY \
   --space "Default"
 ```
 
@@ -76,29 +95,53 @@ octopus release create \
 octo deploy-release --project <name> --version <ver> --deployTo <env>
 ```
 
-**New syntax (octopus):**
+**New syntax (octopus v2 - with environment variables):**
 ```bash
+# Set authentication once
+export OCTOPUS_URL="https://kamloicem.octopus.app/"
+export OCTOPUS_API_KEY="your-api-key"
+
+# Then use commands without auth flags
 octopus release deploy \
   --project <name> \
   --version <ver> \
   --deployTo <env> \
-  --server <url> \
-  --apiKey <key> \
   --space <space>
 ```
 
 **Example:**
 ```bash
+export OCTOPUS_URL="https://kamloicem.octopus.app/"
+export OCTOPUS_API_KEY=$OCTOPUS_API_KEY
+
 octopus release deploy \
   --project "meridian - legacy" \
   --version 42 \
   --deployTo "Development" \
-  --server https://kamloicem.octopus.app/ \
-  --apiKey $OCTOPUS_API_KEY \
   --space "Default"
 ```
 
 ## Workflow Usage
+
+### Job-Level Environment Variables
+
+```yaml
+jobs:
+  push-to-octopus:
+    name: Push Packages to Octopus Deploy
+    runs-on: ubuntu-latest
+    env:
+      OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
+      OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+      OCTOPUS_SPACE: Default
+```
+
+### Verify Authentication
+
+```yaml
+- name: Verify Authentication
+  run: octopus space list
+```
 
 ### Push Packages Job
 
@@ -106,9 +149,7 @@ octopus release deploy \
 - name: Push LegacyLoanProcessor to Octopus
   run: |
     octopus package upload \
-      --file LegacyLoanProcessor.${{ env.VERSION }}.zip \
-      --server ${{ env.OCTOPUS_SERVER_URL }} \
-      --apiKey ${{ env.OCTOPUS_API_KEY }} \
+      --file LegacyLoanProcessor.${{ github.run_number }}.zip \
       --space "${{ env.OCTOPUS_SPACE }}"
 ```
 
@@ -119,9 +160,7 @@ octopus release deploy \
   run: |
     octopus release create \
       --project "meridian - legacy" \
-      --version ${{ env.VERSION }} \
-      --server ${{ env.OCTOPUS_SERVER_URL }} \
-      --apiKey ${{ env.OCTOPUS_API_KEY }} \
+      --version ${{ github.run_number }} \
       --space "${{ env.OCTOPUS_SPACE }}"
 ```
 
@@ -132,20 +171,22 @@ octopus release deploy \
   run: |
     octopus release deploy \
       --project "meridian - legacy" \
-      --version ${{ env.VERSION }} \
+      --version ${{ github.run_number }} \
       --deployTo "Development" \
-      --server ${{ env.OCTOPUS_SERVER_URL }} \
-      --apiKey ${{ env.OCTOPUS_API_KEY }} \
       --space "${{ env.OCTOPUS_SPACE }}"
 ```
 
 ## Common Options
 
-### Authentication
+### Authentication (via Environment Variables)
 ```bash
---server <url>      # Octopus Server URL
---apiKey <key>      # API Key for authentication
---space <name>      # Space name (default: "Default")
+OCTOPUS_URL         # Octopus Server URL
+OCTOPUS_API_KEY     # API Key for authentication
+```
+
+### Command Options
+```bash
+--space <name>      # Space name (required for Cloud)
 ```
 
 ### Package Options
