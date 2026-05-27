@@ -12,7 +12,7 @@ env:
   OCTOPUS_SERVER_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
   OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
   OCTOPUS_SPACE: Default
-  VERSION: ${{ github.run_number }}
+  VERSION: 20.0.1
 
 jobs:
   build-legacy-loan-processor:
@@ -79,7 +79,7 @@ jobs:
         push: true
         platforms: linux/amd64,linux/arm64
         tags: |
-          ghcr.io/kamloicc/customer-api:${{ github.run_number }}
+          ghcr.io/kamloicc/customer-api:${{ env.VERSION }}
           ghcr.io/kamloicc/customer-api:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
