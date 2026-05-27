@@ -162,40 +162,40 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
-    - name: Create release for meridian - legacy
+    - name: Create release for meridian-legacy
       uses: OctopusDeploy/create-release-action@v3
       with:
         server: ${{ secrets.OCTOPUS_SERVER_URL }}
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
-        project: "meridian - legacy"
+        project: "meridian-legacy"
         release_number: ${{ github.run_number }}
     
-    - name: Deploy meridian - legacy to Development
+    - name: Deploy meridian-legacy to Development
       uses: OctopusDeploy/deploy-release-action@v3
       with:
         server: ${{ secrets.OCTOPUS_SERVER_URL }}
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
-        project: "meridian - legacy"
+        project: "meridian-legacy"
         release_number: ${{ github.run_number }}
         environments: "Development"
     
-    - name: Create release for meridian - customer api
+    - name: Create release for meridian-customer-api
       uses: OctopusDeploy/create-release-action@v3
       with:
         server: ${{ secrets.OCTOPUS_SERVER_URL }}
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
-        project: "meridian - customer api"
+        project: "meridian-customer-api"
         release_number: ${{ github.run_number }}
     
-    - name: Deploy meridian - customer api to Development
+    - name: Deploy meridian-customer-api to Development
       uses: OctopusDeploy/deploy-release-action@v3
       with:
         server: ${{ secrets.OCTOPUS_SERVER_URL }}
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
-        project: "meridian - customer api"
+        project: "meridian-customer-api"
         release_number: ${{ github.run_number }}
         environments: "Development"
