@@ -142,18 +142,21 @@ jobs:
     - name: Install Octopus CLI
       uses: OctopusDeploy/install-octopus-cli-action@v3
     
+    - name: Verify Octopus CLI Installation
+      run: octopus version
+    
     - name: Push LegacyLoanProcessor to Octopus
       run: |
-        octo push \
-          --package LegacyLoanProcessor.${{ env.VERSION }}.zip \
+        octopus package upload \
+          --file LegacyLoanProcessor.${{ env.VERSION }}.zip \
           --server ${{ env.OCTOPUS_SERVER_URL }} \
           --apiKey ${{ env.OCTOPUS_API_KEY }} \
           --space "${{ env.OCTOPUS_SPACE }}"
     
     - name: Push Helm chart to Octopus
       run: |
-        octo push \
-          --package customer-api-chart-${{ env.VERSION }}.tgz \
+        octopus package upload \
+          --file customer-api-chart-${{ env.VERSION }}.tgz \
           --server ${{ env.OCTOPUS_SERVER_URL }} \
           --apiKey ${{ env.OCTOPUS_API_KEY }} \
           --space "${{ env.OCTOPUS_SPACE }}"
@@ -168,9 +171,12 @@ jobs:
     - name: Install Octopus CLI
       uses: OctopusDeploy/install-octopus-cli-action@v3
     
+    - name: Verify Octopus CLI Installation
+      run: octopus version
+    
     - name: Create release for meridian - legacy
       run: |
-        octo create-release \
+        octopus release create \
           --project "meridian - legacy" \
           --version ${{ env.VERSION }} \
           --server ${{ env.OCTOPUS_SERVER_URL }} \
@@ -179,7 +185,7 @@ jobs:
     
     - name: Deploy meridian - legacy to Development
       run: |
-        octo deploy-release \
+        octopus release deploy \
           --project "meridian - legacy" \
           --version ${{ env.VERSION }} \
           --deployTo "Development" \
@@ -189,7 +195,7 @@ jobs:
     
     - name: Create release for meridian - customer api
       run: |
-        octo create-release \
+        octopus release create \
           --project "meridian - customer api" \
           --version ${{ env.VERSION }} \
           --server ${{ env.OCTOPUS_SERVER_URL }} \
@@ -198,7 +204,7 @@ jobs:
     
     - name: Deploy meridian - customer api to Development
       run: |
-        octo deploy-release \
+        octopus release deploy \
           --project "meridian - customer api" \
           --version ${{ env.VERSION }} \
           --deployTo "Development" \
