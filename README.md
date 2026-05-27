@@ -165,42 +165,64 @@ cd publish
 zip -r LegacyLoanProcessor.zip .
 ```
 
-## CI/CD Pipeline
+## CI/CD Pipeline - Fully Automated
 
-GitHub Actions workflow (`.github/workflows/build-and-package.yml`) provides automated builds.
+GitHub Actions workflow (`.github/workflows/build-and-package.yml`) provides complete automation from commit to deployment.
 
-### Workflow Features
-- Builds LegacyLoanProcessor ZIP package
-- Builds and pushes Docker image to GHCR
-- Packages Helm chart with synchronized versioning
-- Supports semantic versioning via Git tags
+### Automated Workflow
+When you push to the `main` branch:
 
-### Image Tags
-- `main` branch → `ghcr.io/kamloicc/customer-api:latest`
-- `develop` branch → `ghcr.io/kamloicc/customer-api:develop-<sha>`
-- Git tag `v1.2.3` → `ghcr.io/kamloicc/customer-api:1.2.3`
+1. **Build Applications**
+   - Compiles LegacyLoanProcessor
+   - Builds CustomerApi Docker image
+   
+2. **Package Artifacts**
+   - Creates `LegacyLoanProcessor.<run_number>.zip`
+   - Pushes Docker image to GHCR as `ghcr.io/kamloicc/customer-api:<run_number>`
+   - Tags Docker image as `latest`
+   - Packages Helm chart as `customer-api-chart-<run_number>.tgz`
+   
+3. **Push to Octopus Deploy**
+   - Uploads ZIP package to Octopus built-in feed
+   - Uploads Helm chart to Octopus built-in feed
+   
+4. **Create Octopus Releases**
+   - Creates release `<run_number>` for `meridian-legacy` project
+   - Creates release `<run_number>` for `meridian-customer-api` project
+   
+5. **Auto-Deploy to Development**
+   - Deploys both releases to Development environment automatically
 
-### Artifacts
-- **legacy-loan-processor:** ZIP package
-- **customer-api-chart:** Helm chart (.tgz)
+### Synchronized Versioning
+All version numbers match the GitHub Actions run number:
+- Docker image tag: `42`
+- Helm chart version: `42`
+- Octopus release number: `42`
 
-### Release Process
+Example for run #42:
+- `ghcr.io/kamloicc/customer-api:42`
+- `customer-api-chart-42.tgz`
+- Octopus Release: `42`
 
-Create a semantic version tag:
+### Simple Deployment Flow
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git add .
+git commit -m "Your changes"
+git push origin main
 ```
 
-This triggers the workflow to:
-1. Build Docker image with version tag
-2. Package Helm chart with matching version
-3. Upload artifacts
+This single push automatically:
+- Builds everything
+- Publishes to GHCR
+- Pushes packages to Octopus
+- Creates releases
+- Deploys to Development
 
 ### Required Secrets
-- `OCTOPUS_SERVER_URL` - Octopus Deploy server URL
-- `OCTOPUS_API_KEY` - Octopus API key
-- `GITHUB_TOKEN` - Automatically provided
+Configure these in GitHub Settings → Secrets:
+- `OCTOPUS_SERVER_URL` - Your Octopus Deploy server URL
+- `OCTOPUS_API_KEY` - Octopus API key with permission to push packages and create releases
+- `GITHUB_TOKEN` - Automatically provided by GitHub Actions
 
 ## Octopus Deploy Integration
 

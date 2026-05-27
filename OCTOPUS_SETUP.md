@@ -1,44 +1,72 @@
 # Octopus Deploy Setup Guide
 
-## Package Names for Octopus
+## Fully Automated CI/CD
+
+The repository is configured for complete automation from GitHub to Octopus Deploy to Development environment.
+
+## Package Names
 
 ### Helm Chart Package
 - **Package Name:** `customer-api-chart`
 - **Format:** `.tgz` (Helm chart archive)
-- **Example:** `customer-api-chart-1.0.0.tgz`
+- **Example:** `customer-api-chart-42.tgz`
 
 ### Docker Image Reference
 - **Image:** `ghcr.io/kamloicc/customer-api`
-- **Tags:** Semantic versions (e.g., `1.0.0`) or `latest`
+- **Tags:** GitHub Actions run number (e.g., `42`)
 
-## GitHub Actions Workflow
+### ZIP Package
+- **Package Name:** `LegacyLoanProcessor`
+- **Example:** `LegacyLoanProcessor.42.zip`
 
-### Automatic Builds
-The workflow triggers on:
-- Push to `main` or `develop` branches
-- Git tags matching `v*.*.*` (e.g., `v1.0.0`)
-- Pull requests to `main`
+## Automated Workflow
 
-### Artifacts Generated
-1. **LegacyLoanProcessor:** ZIP package for traditional deployment
-2. **CustomerApi:** Docker image pushed to GitHub Container Registry
-3. **Helm Chart:** `customer-api-chart-*.tgz` package
-
-### Versioning
-- **Development builds:** `1.0.0-build.<run-number>`
-- **Release builds:** From Git tag (e.g., `v1.2.3` → `1.2.3`)
-
-## Creating a Release
+### Trigger
+Push to `main` branch triggers full automation:
 
 ```bash
-# Tag a release
-git tag v1.0.0
-git push origin v1.0.0
+git push origin main
 ```
 
-This creates:
-- Docker image: `ghcr.io/kamloicc/customer-api:1.0.0`
-- Helm chart: `customer-api-chart-1.0.0.tgz`
+### What Happens Automatically
+
+1. **Build Phase**
+   - Compiles both applications
+   - Runs tests (if configured)
+   
+2. **Package Phase**
+   - Creates `LegacyLoanProcessor.<run>.zip`
+   - Builds and pushes `ghcr.io/kamloicc/customer-api:<run>`
+   - Tags Docker image as `latest`
+   - Packages `customer-api-chart-<run>.tgz`
+   
+3. **Push to Octopus**
+   - Uploads ZIP package to Octopus built-in feed
+   - Uploads Helm chart to Octopus built-in feed
+   
+4. **Release Creation**
+   - Creates release for `meridian-legacy` project
+   - Creates release for `meridian-customer-api` project
+   - Both releases use run number as version
+   
+5. **Auto-Deploy**
+   - Deploys both releases to Development environment
+   - No manual intervention required
+
+## Versioning Strategy
+
+All versions synchronized to GitHub Actions run number:
+- Docker tag: `42`
+- Helm version: `42`
+- Octopus release: `42`
+
+Example for run #42:
+```
+Docker Image: ghcr.io/kamloicc/customer-api:42
+Helm Chart: customer-api-chart-42.tgz
+ZIP Package: LegacyLoanProcessor.42.zip
+Octopus Release: 42
+```
 
 ## Octopus Deploy Configuration
 

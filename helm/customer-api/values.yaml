@@ -18,7 +18,7 @@ resources:
     cpu: 250m
     memory: 256Mi
 
-# Environment variables
+# Environment variables (will be substituted by workflow and Octopus)
 env:
   environment: "Development"
   version: "1.0.0"
