@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-config
+  labels:
+    app: {{ .Chart.Name }}
+data:
+  API_TITLE: {{ .Values.config.apiTitle | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  OCTOPUS_ENVIRONMENT: {{ .Values.environment.MERIDIAN_ENVIRONMENT | quote }}
+  OCTOPUS_VERSION: {{ .Values.environment.MERIDIAN_VERSION | quote }}

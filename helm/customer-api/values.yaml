@@ -1,0 +1,29 @@
+replicaCount: 2
+
+image:
+  repository: meridian/customer-api
+  pullPolicy: IfNotPresent
+  tag: "#{Octopus.Release.Number}"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Environment variables - Octopus will substitute these
+environment:
+  MERIDIAN_ENVIRONMENT: "#{Octopus.Environment.Name}"
+  MERIDIAN_VERSION: "#{Octopus.Release.Number}"
+
+# Additional configuration
+config:
+  apiTitle: "Meridian Customer API"
+  logLevel: "Information"
