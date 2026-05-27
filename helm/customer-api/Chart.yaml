@@ -1,5 +1,5 @@
 apiVersion: v2
-name: customer-api
+name: customer-api-chart
 description: Meridian Customer API - Helm Chart for Octopus Deploy
 type: application
 version: 1.0.0

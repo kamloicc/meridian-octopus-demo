@@ -26,9 +26,9 @@ spec:
           protocol: TCP
         env:
         - name: MERIDIAN_ENVIRONMENT
-          value: {{ .Values.environment.MERIDIAN_ENVIRONMENT | quote }}
+          value: {{ .Values.env.environment | quote }}
         - name: MERIDIAN_VERSION
-          value: {{ .Values.environment.MERIDIAN_VERSION | quote }}
+          value: {{ .Values.env.version | quote }}
         - name: ASPNETCORE_URLS
           value: "http://+:{{ .Values.service.targetPort }}"
         envFrom:
