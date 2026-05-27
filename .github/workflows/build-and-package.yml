@@ -127,6 +127,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-legacy-loan-processor, build-customer-api, package-helm-chart]
     if: github.ref == 'refs/heads/main'
+    env:
+      OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
+      OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+      OCTOPUS_SPACE: Default
     
     steps:
     - name: Download LegacyLoanProcessor artifact
@@ -145,20 +149,19 @@ jobs:
     - name: Verify Octopus CLI Installation
       run: octopus version
     
+    - name: Verify Authentication
+      run: octopus space list
+    
     - name: Push LegacyLoanProcessor to Octopus
       run: |
         octopus package upload \
-          --file LegacyLoanProcessor.${{ env.VERSION }}.zip \
-          --server ${{ env.OCTOPUS_SERVER_URL }} \
-          --apiKey ${{ env.OCTOPUS_API_KEY }} \
+          --file LegacyLoanProcessor.${{ github.run_number }}.zip \
           --space "${{ env.OCTOPUS_SPACE }}"
     
     - name: Push Helm chart to Octopus
       run: |
         octopus package upload \
-          --file customer-api-chart-${{ env.VERSION }}.tgz \
-          --server ${{ env.OCTOPUS_SERVER_URL }} \
-          --apiKey ${{ env.OCTOPUS_API_KEY }} \
+          --file customer-api-chart-${{ github.run_number }}.tgz \
           --space "${{ env.OCTOPUS_SPACE }}"
 
   create-octopus-releases:
@@ -166,6 +169,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: push-to-octopus
     if: github.ref == 'refs/heads/main'
+    env:
+      OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER_URL }}
+      OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+      OCTOPUS_SPACE: Default
     
     steps:
     - name: Install Octopus CLI
@@ -174,40 +181,35 @@ jobs:
     - name: Verify Octopus CLI Installation
       run: octopus version
     
+    - name: Verify Authentication
+      run: octopus space list
+    
     - name: Create release for meridian - legacy
       run: |
         octopus release create \
           --project "meridian - legacy" \
-          --version ${{ env.VERSION }} \
-          --server ${{ env.OCTOPUS_SERVER_URL }} \
-          --apiKey ${{ env.OCTOPUS_API_KEY }} \
+          --version ${{ github.run_number }} \
           --space "${{ env.OCTOPUS_SPACE }}"
     
     - name: Deploy meridian - legacy to Development
       run: |
         octopus release deploy \
           --project "meridian - legacy" \
-          --version ${{ env.VERSION }} \
+          --version ${{ github.run_number }} \
           --deployTo "Development" \
-          --server ${{ env.OCTOPUS_SERVER_URL }} \
-          --apiKey ${{ env.OCTOPUS_API_KEY }} \
           --space "${{ env.OCTOPUS_SPACE }}"
     
     - name: Create release for meridian - customer api
       run: |
         octopus release create \
           --project "meridian - customer api" \
-          --version ${{ env.VERSION }} \
-          --server ${{ env.OCTOPUS_SERVER_URL }} \
-          --apiKey ${{ env.OCTOPUS_API_KEY }} \
+          --version ${{ github.run_number }} \
           --space "${{ env.OCTOPUS_SPACE }}"
     
     - name: Deploy meridian - customer api to Development
       run: |
         octopus release deploy \
           --project "meridian - customer api" \
-          --version ${{ env.VERSION }} \
+          --version ${{ github.run_number }} \
           --deployTo "Development" \
-          --server ${{ env.OCTOPUS_SERVER_URL }} \
-          --apiKey ${{ env.OCTOPUS_API_KEY }} \
           --space "${{ env.OCTOPUS_SPACE }}"
