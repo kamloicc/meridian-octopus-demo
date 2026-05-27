@@ -141,7 +141,7 @@ jobs:
         server: ${{ secrets.OCTOPUS_SERVER_URL }}
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
-        packages: "LegacyLoanProcessor.${{ github.run_number }}.zip"
+        packages: "LegacyLoanProcessor.${{ env.VERSION }}.zip"
     
     - name: Push Helm chart to Octopus
       uses: OctopusDeploy/push-package-action@v3
@@ -149,7 +149,7 @@ jobs:
         server: ${{ secrets.OCTOPUS_SERVER_URL }}
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
-        packages: "customer-api-chart-${{ github.run_number }}.tgz"
+        packages: "customer-api-chart-${{ env.VERSION }}.tgz"
 
   create-octopus-releases:
     name: Create and Deploy Octopus Releases
@@ -165,7 +165,7 @@ jobs:
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
         project: "meridian-legacy"
-        release_number: ${{ github.run_number }}
+        release_number: ${{ env.VERSION }}
     
     - name: Deploy meridian-legacy to Development
       uses: OctopusDeploy/deploy-release-action@v3
@@ -174,7 +174,7 @@ jobs:
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
         project: "meridian-legacy"
-        release_number: ${{ github.run_number }}
+        release_number: ${{ env.VERSION }}
         environments: "Development"
     
     - name: Create release for meridian-customer-api
@@ -184,7 +184,7 @@ jobs:
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
         project: "meridian-customer-api"
-        release_number: ${{ github.run_number }}
+        release_number: ${{ env.VERSION }}
     
     - name: Deploy meridian-customer-api to Development
       uses: OctopusDeploy/deploy-release-action@v3
@@ -193,5 +193,5 @@ jobs:
         api_key: ${{ secrets.OCTOPUS_API_KEY }}
         space: "Default"
         project: "meridian-customer-api"
-        release_number: ${{ github.run_number }}
+        release_number: ${{ env.VERSION }}
         environments: "Development"
