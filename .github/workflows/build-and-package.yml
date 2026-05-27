@@ -166,6 +166,7 @@ jobs:
         space: "Default"
         project: "meridian-legacy"
         release_number: ${{ env.VERSION }}
+        ignore_existing: true
     
     - name: Deploy meridian-legacy to Development
       uses: OctopusDeploy/deploy-release-action@v3
@@ -185,6 +186,7 @@ jobs:
         space: "Default"
         project: "meridian-customer-api"
         release_number: ${{ env.VERSION }}
+        ignore_existing: true
     
     - name: Deploy meridian-customer-api to Development
       uses: OctopusDeploy/deploy-release-action@v3
