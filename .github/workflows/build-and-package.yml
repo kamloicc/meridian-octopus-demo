@@ -168,38 +168,38 @@ jobs:
     - name: Install Octopus CLI
       uses: OctopusDeploy/install-octopus-cli-action@v3
     
-    - name: Create release for meridian-legacy
+    - name: Create release for meridian - legacy
       run: |
         octo create-release \
-          --project "meridian-legacy" \
+          --project "meridian - legacy" \
           --version ${{ env.VERSION }} \
           --server ${{ env.OCTOPUS_SERVER_URL }} \
           --apiKey ${{ env.OCTOPUS_API_KEY }} \
           --space "${{ env.OCTOPUS_SPACE }}"
     
-    - name: Deploy meridian-legacy to Development
+    - name: Deploy meridian - legacy to Development
       run: |
         octo deploy-release \
-          --project "meridian-legacy" \
+          --project "meridian - legacy" \
           --version ${{ env.VERSION }} \
           --deployTo "Development" \
           --server ${{ env.OCTOPUS_SERVER_URL }} \
           --apiKey ${{ env.OCTOPUS_API_KEY }} \
           --space "${{ env.OCTOPUS_SPACE }}"
     
-    - name: Create release for meridian-customer-api
+    - name: Create release for meridian - customer api
       run: |
         octo create-release \
-          --project "meridian-customer-api" \
+          --project "meridian - customer api" \
           --version ${{ env.VERSION }} \
           --server ${{ env.OCTOPUS_SERVER_URL }} \
           --apiKey ${{ env.OCTOPUS_API_KEY }} \
           --space "${{ env.OCTOPUS_SPACE }}"
     
-    - name: Deploy meridian-customer-api to Development
+    - name: Deploy meridian - customer api to Development
       run: |
         octo deploy-release \
-          --project "meridian-customer-api" \
+          --project "meridian - customer api" \
           --version ${{ env.VERSION }} \
           --deployTo "Development" \
           --server ${{ env.OCTOPUS_SERVER_URL }} \
