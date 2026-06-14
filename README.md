@@ -165,44 +165,58 @@ cd publish
 zip -r LegacyLoanProcessor.zip .
 ```
 
-## CI/CD Pipeline - Fully Automated
+## CI/CD Pipeline - Fully Automated & Idempotent
 
-GitHub Actions workflow (`.github/workflows/build-and-package.yml`) provides complete automation from commit to deployment.
+GitHub Actions workflow (`.github/workflows/build-and-package.yml`) provides complete automation from commit to deployment with full idempotency support.
 
 ### Automated Workflow
 When you push to the `main` branch:
 
 1. **Build Applications**
    - Compiles LegacyLoanProcessor
-   - Builds CustomerApi Docker image
+   - Builds multi-architecture CustomerApi Docker image (AMD64 + ARM64)
    
 2. **Package Artifacts**
-   - Creates `LegacyLoanProcessor.<run_number>.zip`
-   - Pushes Docker image to GHCR as `ghcr.io/kamloicc/customer-api:<run_number>`
+   - Creates `LegacyLoanProcessor.20.0.1.zip`
+   - Pushes Docker image to GHCR as `ghcr.io/kamloicc/customer-api:20.0.1`
    - Tags Docker image as `latest`
-   - Packages Helm chart as `customer-api-chart-<run_number>.tgz`
+   - Packages Helm chart as `customer-api-chart-20.0.1.tgz`
    
-3. **Push to Octopus Deploy**
-   - Uploads ZIP package to Octopus built-in feed
-   - Uploads Helm chart to Octopus built-in feed
+3. **Push to Octopus Deploy** (Idempotent)
+   - Uploads ZIP package to Octopus built-in feed (overwrites if exists)
+   - Uploads Helm chart to Octopus built-in feed (overwrites if exists)
+   - Uses `overwrite_mode: OverwriteExisting` for safe reruns
    
-4. **Create Octopus Releases**
-   - Creates release `<run_number>` for `meridian-legacy` project
-   - Creates release `<run_number>` for `meridian-customer-api` project
+4. **Create Octopus Releases** (Idempotent)
+   - Creates release `20.0.1` for `meridian-legacy` project
+   - Creates release `20.0.1` for `meridian-customer-api` project
+   - Uses `ignore_existing: true` to skip if already exists
    
 5. **Auto-Deploy to Development**
    - Deploys both releases to Development environment automatically
+   - Redeployable without errors
 
-### Synchronized Versioning
-All version numbers match the GitHub Actions run number:
-- Docker image tag: `42`
-- Helm chart version: `42`
-- Octopus release number: `42`
+### Semantic Versioning
+Current version: **20.0.1**
 
-Example for run #42:
-- `ghcr.io/kamloicc/customer-api:42`
-- `customer-api-chart-42.tgz`
-- Octopus Release: `42`
+All version numbers are synchronized using semantic versioning:
+- Docker image tag: `20.0.1` (and `latest`)
+- Helm chart version: `20.0.1`
+- Octopus release number: `20.0.1`
+- ZIP package version: `20.0.1`
+
+Example artifacts:
+- `ghcr.io/kamloicc/customer-api:20.0.1`
+- `customer-api-chart-20.0.1.tgz`
+- `LegacyLoanProcessor.20.0.1.zip`
+- Octopus Releases: `20.0.1`
+
+### Idempotent Pipeline Benefits
+The workflow is fully rerun-safe:
+- **Package uploads:** Overwrites existing packages automatically
+- **Release creation:** Ignores if release already exists
+- **Deployments:** Can be redeployed safely
+- **No manual cleanup:** Just push and run again
 
 ### Simple Deployment Flow
 ```bash
@@ -253,16 +267,28 @@ Configure these in GitHub Settings → Secrets:
 
 ## Versioning Strategy
 
-The Helm chart version and Docker image tag stay synchronized:
+All artifacts use **semantic versioning** (MAJOR.MINOR.PATCH) controlled by the VERSION environment variable in the workflow.
 
-- **Development builds:** `1.0.0-build.<run-number>`
-- **Tagged releases:** Semantic version from Git tag (e.g., `v1.2.3` → `1.2.3`)
+### Current Version: 20.0.1
 
-Example:
-```bash
-git tag v1.2.3
-git push origin v1.2.3
-# Results in:
-#   Docker: ghcr.io/kamloicc/customer-api:1.2.3
-#   Helm: customer-api-chart-1.2.3.tgz
+All artifacts are synchronized to this version:
+- Docker image: `ghcr.io/kamloicc/customer-api:20.0.1`
+- Helm chart: `customer-api-chart-20.0.1.tgz`
+- ZIP package: `LegacyLoanProcessor.20.0.1.zip`
+- Octopus releases: `20.0.1`
+
+### Updating Version
+
+To update to a new version, edit the VERSION in `.github/workflows/build-and-package.yml`:
+
+```yaml
+env:
+  VERSION: 20.0.2  # Increment as needed
 ```
+
+**Semantic Versioning Guide:**
+- **PATCH** (20.0.1 → 20.0.2): Bug fixes, hotfixes
+- **MINOR** (20.0.2 → 20.1.0): New features, backward compatible
+- **MAJOR** (20.1.0 → 21.0.0): Breaking changes
+
+The workflow ensures all artifacts use the same version number, preventing version drift across the deployment pipeline.
